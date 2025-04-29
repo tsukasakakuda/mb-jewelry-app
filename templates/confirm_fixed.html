@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>修正後データの確認</title>
+</head>
+<body>
+    <h1>修正後のデータを確認してください</h1>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>行番号</th>
+            <th>box_id</th>
+            <th>box_no</th>
+            <th>material</th>
+            <th>misc</th>
+            <th>weight</th>
+        </tr>
+        {% for item in fixed_data %}
+        <tr>
+            <td>{{ item.index }}</td>
+            <td>{{ item.row_data.box_id }}</td>
+            <td>{{ item.row_data.box_no }}</td>
+            <td>{{ item.row_data.material }}</td>
+            <td>{{ item.row_data.misc }}</td>
+            <td>{{ item.row_data.weight }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <form method="POST" action="/download_fixed">
+        <button type="submit">このデータをダウンロードする</button>
+    </form>
+</body>
+</html>
