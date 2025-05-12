@@ -1,17 +1,24 @@
-# ベースイメージ（Pythonスリム）
-FROM python:3.9-slim
+# ベースイメージ（Node + Python構成でVueとFlaskをビルド）
+FROM node:18 AS build-stage
+WORKDIR /app
+COPY frontend ./frontend
+WORKDIR /app/frontend
+RUN npm install && npm run build
 
-# 作業ディレクトリ作成
+# Flask本番用イメージ
+FROM python:3.9-slim
 WORKDIR /app
 
-# 必要ファイルをコピー
-COPY requirements.txt requirements.txt
+# Flaskの依存をインストール
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# アプリケーションファイルをコピー
 COPY . .
 
-# Cloud Run は PORT を環境変数で受け取る
-ENV PORT=8080
+# VueのdistをFlask用静的フォルダに配置
+COPY --from=build-stage /app/frontend/dist ./frontend/dist
 
-# Flask 実行
-CMD ["python", "app.py"]
+# Flask起動設定（Vueの静的配信を含む app.py を使用）
+ENV PORT=8080
+CMD ["python", "api.py"]
