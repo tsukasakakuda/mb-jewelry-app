@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import re
 import io
+import os
 
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
@@ -176,4 +177,5 @@ def calculate_fixed():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5050)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=False, host="0.0.0.0", port=port)
