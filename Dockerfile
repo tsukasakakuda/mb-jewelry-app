@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 COPY --from=build-stage /app/frontend/dist ./frontend/dist
 ENV PORT=8080
-CMD ["python", "api.py"]
+CMD ["python", "backend/api.py"]
