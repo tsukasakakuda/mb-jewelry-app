@@ -7,7 +7,12 @@ import re
 import io
 import os
 
-app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
+# Flask の静的ファイルパスをプロジェクトルート基準で指定
+project_root = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(project_root, '..', 'frontend', 'dist')
+
+app = Flask(__name__, static_folder=static_dir, static_url_path='')
+
 CORS(app)
 
 @app.route('/')
