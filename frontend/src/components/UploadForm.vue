@@ -113,11 +113,36 @@ export default {
           body: formData
         });
         const data = await res.json();
-        console.log("check-weights response:", data); // ✅ 追加
         this.invalidWeights = data.invalid_weights || [];
 
         const errorIndexes = new Set(this.invalidWeights.map(w => w.index));
         this.validItems = this.allItems.filter((_, idx) => !errorIndexes.has(idx));
+
+        // ✅ エラーがなかった場合も再計算実行
+        if (this.invalidWeights.length === 0) {
+          const payload = {
+            item_data: this.validItems,
+            price_data: this.priceData
+          };
+          const calcRes = await fetch(`${this.baseURL}/calculate-fixed`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const blob = await calcRes.blob();
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "calculated_result.csv");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+
+          alert("エラーはありません。結果CSVをダウンロードしました。");
+        }
+
       } catch (err) {
         console.error("checkWeightsエラー:", err);
         alert("CSVチェックに失敗しました");
