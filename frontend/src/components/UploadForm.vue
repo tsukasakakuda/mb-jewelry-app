@@ -1,8 +1,6 @@
 <template>
   <div class="min-h-screen bg-white p-8">
     <div class="w-full">
-  <!-- <div class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl space-y-6"> -->
       <h1 class="text-2xl font-bold text-gray-800 text-center">CSVアップロードによる自動計算</h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">
@@ -115,6 +113,7 @@ export default {
           body: formData
         });
         const data = await res.json();
+        console.log("check-weights response:", data); // ✅ 追加
         this.invalidWeights = data.invalid_weights || [];
 
         const errorIndexes = new Set(this.invalidWeights.map(w => w.index));
