@@ -74,7 +74,8 @@ export default {
       priceData: [],
       invalidWeights: [],
       allItems: [],
-      validItems: []
+      validItems: [],
+      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app" // ← 本番API URL
     };
   },
   methods: {
@@ -104,12 +105,12 @@ export default {
         const values = row.split(',');
         const obj = {};
         headers.forEach((h, i) => obj[h.trim()] = values[i]?.trim() ?? '');
-        obj.original_index = index; // ✅ ここが必要！
+        obj.original_index = index;
         return obj;
       });
 
       try {
-        const res = await fetch("http://localhost:5050/check-weights", {
+        const res = await fetch(`${this.baseURL}/check-weights`, {
           method: "POST",
           body: formData
         });
@@ -133,7 +134,7 @@ export default {
       };
 
       try {
-        const res = await fetch("http://localhost:5050/calculate-fixed", {
+        const res = await fetch(`${this.baseURL}/calculate-fixed`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -156,14 +157,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-input[type="file"]::-webkit-file-upload-button {
-  background: #e2e8f0;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-</style>
