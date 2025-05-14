@@ -30,8 +30,8 @@
       </form>
 
       <div v-if="invalidWeights.length">
-        <h2 class="text-lg font-semibold text-red-600">修正が必要なデータ</h2>
-        <table class="table-auto w-full text-sm border">
+        <h2 class="text-lg font-semibold text-red-600 mt-8">修正が必要なデータ</h2>
+        <table class="table-auto w-full text-sm border mt-2">
           <thead>
             <tr>
               <th class="border px-2">box_id</th>
@@ -73,15 +73,17 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
-      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app" // ← 本番API URL
+      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
     };
   },
   methods: {
     onItemChange(e) {
-      this.itemFile = e.target.files[0];
+      this.itemFile = e.target.files[0] || null;
     },
     async onPriceChange(e) {
-      this.priceFile = e.target.files[0];
+      this.priceFile = e.target.files[0] || null;
+      if (!this.priceFile) return;
+
       const text = await this.priceFile.text();
       const rows = text.trim().split('\n');
       const headers = rows[0].split(',');
@@ -93,6 +95,11 @@ export default {
       });
     },
     async checkWeights() {
+      if (!this.itemFile || !this.priceFile) {
+        alert("両方のCSVファイルを選択してください");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("item_file", this.itemFile);
 
@@ -118,31 +125,10 @@ export default {
         const errorIndexes = new Set(this.invalidWeights.map(w => w.index));
         this.validItems = this.allItems.filter((_, idx) => !errorIndexes.has(idx));
 
-        // ✅ エラーがなかった場合も再計算実行
+        // ✅ エラーがなかった場合も計算を実行
         if (this.invalidWeights.length === 0) {
-          const payload = {
-            item_data: this.validItems,
-            price_data: this.priceData
-          };
-          const calcRes = await fetch(`${this.baseURL}/calculate-fixed`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          const blob = await calcRes.blob();
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "calculated_result.csv");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-
-          alert("エラーはありません。結果CSVをダウンロードしました。");
+          this.submitFixedData();
         }
-
       } catch (err) {
         console.error("checkWeightsエラー:", err);
         alert("CSVチェックに失敗しました");
@@ -181,3 +167,14 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+input[type="file"]::-webkit-file-upload-button {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+</style>
