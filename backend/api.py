@@ -117,8 +117,8 @@ def calculate_fixed():
                 item_df.at[idx, 'weight'] = None
         price_df = pd.DataFrame(data.get('price_data', []))
         result_df = calculate_items(item_df, price_df)
-        result_df['box_no'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
-        result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
+        result_df['box_no'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
+        result_df['box_id'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
         result_df = result_df.sort_values(by=['box_no', 'box_id'])
         if 'original_index' in result_df.columns:
             result_df = result_df.drop(columns=['original_index'])
