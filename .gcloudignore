@@ -1,0 +1,10 @@
+# 除外したいファイル・フォルダ
+.git
+.gitignore
+node_modules
+__pycache__
+.env
+.vscode
+
+# ✅ 含めたいものは除外しない（frontend/distなど）
+# frontend/dist を削除しないこと！
