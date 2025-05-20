@@ -1,5 +1,5 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import './assets/main.css'  // Tailwind CSSを読み込む
+import { createApp } from 'vue';
+import App from './App.vue';
+import './style.css';
 
-createApp(App).mount('#app')
+createApp(App).mount('#app');

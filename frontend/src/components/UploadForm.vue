@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen bg-white p-8">
-    <div class="w-full">
-      <h1 class="text-2xl font-bold text-gray-800 text-center">CSVアップロードによる自動計算</h1>
+  <div class="min-h-screen bg-white p-6 w-full">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <h1 class="text-2xl font-bold text-gray-800 text-center">
+        CSVアップロードによる自動計算
+      </h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">
         <div>
@@ -10,7 +12,7 @@
             type="file"
             @change="onItemChange"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white"
           />
         </div>
         <div>
@@ -19,11 +21,14 @@
             type="file"
             @change="onPriceChange"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white"
           />
         </div>
         <div class="text-center">
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md">
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md"
+          >
             アップロードしてチェック
           </button>
         </div>
@@ -54,7 +59,10 @@
           </tbody>
         </table>
         <div class="text-right mt-4">
-          <button @click="submitFixedData" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+          <button
+            @click="submitFixedData"
+            class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+          >
             修正して再計算（CSVダウンロード）
           </button>
         </div>
@@ -73,15 +81,17 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
-      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app" // ← 本番API URL
+      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
     };
   },
   methods: {
     onItemChange(e) {
-      this.itemFile = e.target.files[0];
+      this.itemFile = e.target.files[0] || null;
     },
     async onPriceChange(e) {
-      this.priceFile = e.target.files[0];
+      this.priceFile = e.target.files[0] || null;
+      if (!this.priceFile) return;
+
       const text = await this.priceFile.text();
       const rows = text.trim().split('\n');
       const headers = rows[0].split(',');
@@ -93,6 +103,11 @@ export default {
       });
     },
     async checkWeights() {
+      if (!this.itemFile || !this.priceFile) {
+        alert("両方のCSVファイルを選択してください");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("item_file", this.itemFile);
 
@@ -118,31 +133,10 @@ export default {
         const errorIndexes = new Set(this.invalidWeights.map(w => w.index));
         this.validItems = this.allItems.filter((_, idx) => !errorIndexes.has(idx));
 
-        // ✅ エラーがなかった場合も再計算実行
+        // ✅ エラーがなかった場合も計算を実行
         if (this.invalidWeights.length === 0) {
-          const payload = {
-            item_data: this.validItems,
-            price_data: this.priceData
-          };
-          const calcRes = await fetch(`${this.baseURL}/calculate-fixed`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          const blob = await calcRes.blob();
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "calculated_result.csv");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-
-          alert("エラーはありません。結果CSVをダウンロードしました。");
+          this.submitFixedData();
         }
-
       } catch (err) {
         console.error("checkWeightsエラー:", err);
         alert("CSVチェックに失敗しました");
@@ -181,3 +175,14 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+input[type="file"]::-webkit-file-upload-button {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+</style>
