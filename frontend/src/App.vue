@@ -1,7 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-8">
-    <UploadForm />
-  </div>
+  <UploadForm />
 </template>
 
 <script>

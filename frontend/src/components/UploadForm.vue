@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen bg-white p-8">
-    <div class="w-full">
-      <h1 class="text-2xl font-bold text-gray-800 text-center">CSVアップロードによる自動計算</h1>
+  <div class="min-h-screen bg-white p-6 w-full">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <h1 class="text-2xl font-bold text-gray-800 text-center">
+        CSVアップロードによる自動計算
+      </h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">
         <div>
@@ -10,7 +12,7 @@
             type="file"
             @change="onItemChange"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white"
           />
         </div>
         <div>
@@ -19,19 +21,22 @@
             type="file"
             @change="onPriceChange"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white"
           />
         </div>
         <div class="text-center">
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md">
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md"
+          >
             アップロードしてチェック
           </button>
         </div>
       </form>
 
       <div v-if="invalidWeights.length">
-        <h2 class="text-lg font-semibold text-red-600 mt-8">修正が必要なデータ</h2>
-        <table class="table-auto w-full text-sm border mt-2">
+        <h2 class="text-lg font-semibold text-red-600">修正が必要なデータ</h2>
+        <table class="table-auto w-full text-sm border">
           <thead>
             <tr>
               <th class="border px-2">box_id</th>
@@ -54,7 +59,10 @@
           </tbody>
         </table>
         <div class="text-right mt-4">
-          <button @click="submitFixedData" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+          <button
+            @click="submitFixedData"
+            class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+          >
             修正して再計算（CSVダウンロード）
           </button>
         </div>
