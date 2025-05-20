@@ -143,7 +143,7 @@ def calculate_fixed():
             'jewelry_price', 'material_price', 'total_weight',
             'gemstone_weight', 'material_weight'
         ]
-        result_df = result_df.loc[:, output_columns]
+        result_df = result_df[output_columns]
 
         output = io.StringIO()
         result_df.to_csv(output, index=False)
