@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white p-6 w-full">
     <div class="max-w-4xl mx-auto space-y-6">
       <h1 class="text-2xl font-bold text-gray-800 text-center">
-        CSVアップロードによる自動計算
+        地金自動計算
       </h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">
@@ -81,6 +81,7 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
+      //baseURL: "http://localhost:8080"
       baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
     };
   },

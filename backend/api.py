@@ -9,6 +9,12 @@ import os
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
 
+def ensure_required_columns(df, required_columns):
+    for col in required_columns:
+        if col not in df.columns:
+            df[col] = None
+    return df
+
 def check_invalid_weights(df):
     invalid_rows = []
     for idx, row in df.iterrows():
@@ -77,8 +83,11 @@ def check_weights():
             return jsonify({'error': 'item_file is required'}), 400
 
         df = pd.read_csv(file)
-        invalids = []
 
+        required_columns = ['box_id', 'box_no', 'material', 'misc', 'weight']
+        df = ensure_required_columns(df, required_columns)
+
+        invalids = []
         for idx, row in df.iterrows():
             val = row.get('weight')
             if pd.isna(val) or str(val).strip() == "":
@@ -100,10 +109,7 @@ def check_weights():
                     'row_data': clean_row
                 })
 
-        return jsonify({
-            'invalid_weights': invalids,
-            'status': 'ok' if len(invalids) == 0 else 'has_errors'
-        })
+        return jsonify({'invalid_weights': invalids})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -116,21 +122,28 @@ def calculate_fixed():
             return jsonify({'error': 'No JSON provided'}), 400
 
         item_df = pd.DataFrame(data.get('item_data', []))
+        price_df = pd.DataFrame(data.get('price_data', []))
+
         for idx, row in item_df.iterrows():
             if 'weight' in row and str(row['weight']).strip() == "":
                 item_df.at[idx, 'weight'] = None
-        price_df = pd.DataFrame(data.get('price_data', []))
+
+        required_columns = ['box_id', 'box_no', 'material', 'misc', 'weight']
+        item_df = ensure_required_columns(item_df, required_columns)
 
         result_df = calculate_items(item_df, price_df)
-
 
         result_df['box_no'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
         result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
         result_df = result_df.sort_values(by=['box_no', 'box_id'], ascending=[True, True])
 
-        
-        if 'original_index' in result_df.columns:
-            result_df = result_df.drop(columns=['original_index'])
+        # ✅ 必要なカラムだけに制限
+        output_columns = [
+            'box_id', 'box_no', 'material', 'misc', 'weight',
+            'jewelry_price', 'material_price', 'total_weight',
+            'gemstone_weight', 'material_weight'
+        ]
+        result_df = result_df.loc[:, output_columns]
 
         output = io.StringIO()
         result_df.to_csv(output, index=False)
@@ -147,7 +160,6 @@ def calculate_fixed():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-
     port = int(os.environ.get("PORT", 8080))
     print(f"✅ Starting Flask on port {port}")
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=True, host="0.0.0.0", port=port)
