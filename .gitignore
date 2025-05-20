@@ -24,6 +24,5 @@ instance/
 frontend/node_modules/
 frontend/.vitepress/
 frontend/.output/
-frontend/dist/
 !frontend/dist/index.html
 !frontend/dist/assets/
