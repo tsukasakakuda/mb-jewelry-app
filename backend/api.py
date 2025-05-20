@@ -123,10 +123,12 @@ def calculate_fixed():
 
         result_df = calculate_items(item_df, price_df)
 
+
         result_df['box_no'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
         result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
         result_df = result_df.sort_values(by=['box_no', 'box_id'], ascending=[True, True])
 
+        
         if 'original_index' in result_df.columns:
             result_df = result_df.drop(columns=['original_index'])
 
@@ -145,6 +147,7 @@ def calculate_fixed():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+
     port = int(os.environ.get("PORT", 5050))
     print(f"✅ Starting Flask on port {port}")
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=False, host="0.0.0.0", port=port)
