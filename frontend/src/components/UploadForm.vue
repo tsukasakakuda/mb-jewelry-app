@@ -81,8 +81,8 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
-      //baseURL: "http://localhost:8080"
-      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
+      baseURL: "http://localhost:8080"
+      //baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
     };
   },
   methods: {
