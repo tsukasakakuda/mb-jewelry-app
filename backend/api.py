@@ -5,9 +5,22 @@ import pandas as pd
 import re
 import io
 import os
+import json
 
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
+
+# --- エイリアスマップ読み込み ---
+def load_material_aliases(json_path="material_price_map.json"):
+    with open(json_path, encoding='utf-8') as f:
+        raw = json.load(f)
+    alias_to_main = {}
+    for main, aliases in raw.items():
+        for alias in aliases:
+            alias_to_main[alias.lower()] = main.lower()
+    return alias_to_main
+
+material_aliases = load_material_aliases()
 
 def ensure_required_columns(df, required_columns):
     for col in required_columns:
@@ -32,8 +45,15 @@ def check_invalid_weights(df):
     return invalid_rows
 
 def calculate_items(item_df, price_df):
+    # --- 金額辞書を作る（素材名はエイリアス含む） ---
     price_df['price'] = pd.to_numeric(price_df['price'], errors='coerce').fillna(0)
-    price_dict = dict(zip(price_df['material'].str.lower(), price_df['price']))
+    price_dict_raw = dict(zip(price_df['material'].str.lower(), price_df['price']))
+
+    # エイリアス展開
+    price_dict = {}
+    for alias, main in material_aliases.items():
+        if main in price_dict_raw:
+            price_dict[alias] = price_dict_raw[main]
 
     def calculate(row):
         try:
@@ -46,29 +66,39 @@ def calculate_items(item_df, price_df):
         gemstone_weight = 0.0
         material_price = 0.0
         parts = str(row['misc']).split() if pd.notna(row['misc']) else []
-        material_name = str(row['material']).strip().lower() if pd.notna(row['material']) else None
+        material_field = str(row['material']).strip().lower() if pd.notna(row['material']) else ""
 
-        if material_name and material_name in price_dict:
-            for part in parts:
-                if any(x in part for x in ['#', 'cm', '%']):
-                    continue
-                matches = re.findall(r'(\d+(?:\.\d+)?)', part)
-                if matches:
-                    num = float(matches[0])
-                    if 'mm' in part:
-                        gemstone_weight += num ** 3 / 700
-                    elif '.' in part:
-                        gemstone_weight += num * 0.2
-            material_price = price_dict.get(material_name, 0)
-            material_weight = total_weight - gemstone_weight
-            material_value = material_weight * material_price
+        # 複数素材を処理（例: "pt900/k18"）
+        if "/" in material_field:
+            sub_materials = material_field.split("/")
+            prices = [price_dict.get(m.strip()) for m in sub_materials]
+            valid_prices = [p for p in prices if p is not None]
+            material_price = np.mean(valid_prices) if len(valid_prices) == len(sub_materials) else 0
         else:
-            material_weight = 0
-            material_value = 0
+            material_price = price_dict.get(material_field, 0)
 
-        return pd.Series([material_value, material_price, total_weight, gemstone_weight, material_weight])
+        # 宝石重量推定
+        for part in parts:
+            if any(x in part for x in ['#', 'cm', '%']):
+                continue
+            matches = re.findall(r'(\d+(?:\.\d+)?)', part)
+            if matches:
+                num = float(matches[0])
+                if 'mm' in part:
+                    gemstone_weight += num ** 3 / 700
+                elif '.' in part:
+                    gemstone_weight += num * 0.2
 
-    item_df[['jewelry_price', 'material_price', 'total_weight', 'gemstone_weight', 'material_weight']] = item_df.apply(calculate, axis=1)
+        material_weight = total_weight - gemstone_weight
+        material_value = material_weight * material_price
+
+        return pd.Series([
+            material_value, material_price, total_weight,
+            gemstone_weight, material_weight
+        ])
+
+    item_df[['jewelry_price', 'material_price', 'total_weight',
+             'gemstone_weight', 'material_weight']] = item_df.apply(calculate, axis=1)
     return item_df
 
 @app.route('/')
@@ -135,17 +165,15 @@ def calculate_fixed():
 
         result_df['box_no'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
         result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
-        result_df = result_df.sort_values(by=['box_no', 'box_id'], ascending=[True, True])
+        result_df = result_df.sort_values(by=['box_no', 'box_id'])
 
+        # ✅ 出力対象のカラムだけに制限
         output_columns = [
             'box_id', 'box_no', 'material', 'misc', 'weight',
-            'jewelry_price', 'material_price', 'total_weight', 'gemstone_weight', 'material_weight'
+            'jewelry_price', 'material_price', 'total_weight',
+            'gemstone_weight', 'material_weight'
         ]
-        # 存在するカラムだけ選ぶ（不要カラムを除去し、欠損も避ける）
-        existing_columns = [col for col in output_columns if col in result_df.columns]
-        
-        result_df = result_df[existing_columns]
-        # result_df = result_df[output_columns]
+        result_df = result_df[[col for col in output_columns if col in result_df.columns]]
 
         output = io.StringIO()
         result_df.to_csv(output, index=False)
