@@ -137,13 +137,15 @@ def calculate_fixed():
         result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
         result_df = result_df.sort_values(by=['box_no', 'box_id'], ascending=[True, True])
 
-        # ✅ 必要なカラムだけに制限
         output_columns = [
             'box_id', 'box_no', 'material', 'misc', 'weight',
-            'jewelry_price', 'material_price', 'total_weight',
-            'gemstone_weight', 'material_weight'
+            'jewelry_price', 'material_price', 'total_weight', 'gemstone_weight', 'material_weight'
         ]
-        result_df = result_df[output_columns]
+        # 存在するカラムだけ選ぶ（不要カラムを除去し、欠損も避ける）
+        existing_columns = [col for col in output_columns if col in result_df.columns]
+        
+        result_df = result_df[existing_columns]
+        # result_df = result_df[output_columns]
 
         output = io.StringIO()
         result_df.to_csv(output, index=False)
