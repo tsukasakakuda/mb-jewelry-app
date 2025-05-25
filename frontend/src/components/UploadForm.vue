@@ -159,11 +159,15 @@ export default {
           body: JSON.stringify(payload)
         });
 
+        const disposition = res.headers.get("Content-Disposition");
+        const match = disposition && disposition.match(/filename="?(.+)"?/);
+        const filename = match ? match[1] : "calculated_result.csv";
+
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "calculated_result.csv");
+        link.setAttribute("download", filename);  // ← 動的ファイル名に変更
         document.body.appendChild(link);
         link.click();
         link.remove();

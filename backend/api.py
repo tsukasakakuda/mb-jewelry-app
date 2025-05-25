@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import re
@@ -97,8 +98,7 @@ def calculate_items(item_df, price_df):
             gemstone_weight, material_weight
         ])
 
-    item_df[['jewelry_price', 'material_price', 'total_weight',
-             'gemstone_weight', 'material_weight']] = item_df.apply(calculate, axis=1)
+    item_df[['jewelry_price', 'material_price', 'total_weight', 'gemstone_weight', 'material_weight']] = item_df.apply(calculate, axis=1)
     return item_df
 
 @app.route('/')
@@ -179,11 +179,14 @@ def calculate_fixed():
         result_df.to_csv(output, index=False)
         output.seek(0)
 
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        filename = f"calculated_result_{timestamp}.csv"
+
         return send_file(
             io.BytesIO(output.getvalue().encode('utf-8-sig')),
             mimetype='text/csv',
             as_attachment=True,
-            download_name='calculated_result.csv'
+            download_name=filename
         )
 
     except Exception as e:
@@ -192,4 +195,4 @@ def calculate_fixed():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     print(f"✅ Starting Flask on port {port}")
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=False, host="0.0.0.0", port=port)
