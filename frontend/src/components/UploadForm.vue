@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white p-6 w-full">
     <div class="max-w-4xl mx-auto space-y-6">
       <h1 class="text-2xl font-bold text-gray-800 text-center">
-        地金自動計算
+        地金自動計算_修正
       </h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">
@@ -81,8 +81,9 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
+      baseURL: import.meta.env.VITE_API_BASE
       //baseURL: "http://localhost:8080"
-      baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
+      //baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
     };
   },
   methods: {
@@ -159,11 +160,15 @@ export default {
           body: JSON.stringify(payload)
         });
 
+        const disposition = res.headers.get("Content-Disposition");
+        const match = disposition && disposition.match(/filename="?(.+)"?/);
+        const filename = match ? match[1] : "calculated_result.csv";
+
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "calculated_result.csv");
+        link.setAttribute("download", filename);  // ← 動的ファイル名に変更
         document.body.appendChild(link);
         link.click();
         link.remove();
