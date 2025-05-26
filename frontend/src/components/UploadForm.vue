@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-white p-6 w-full">
     <div class="max-w-4xl mx-auto space-y-6">
       <h1 class="text-2xl font-bold text-gray-800 text-center">
-        地金自動計算_修正
+        地金自動計算
       </h1>
 
       <form @submit.prevent="checkWeights" class="space-y-4">

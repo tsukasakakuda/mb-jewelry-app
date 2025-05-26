@@ -165,7 +165,7 @@ def calculate_fixed():
 
         result_df['box_no'] = pd.to_numeric(result_df['box_no'], errors='coerce').fillna(0).astype(int)
         result_df['box_id'] = pd.to_numeric(result_df['box_id'], errors='coerce').fillna(0).astype(int)
-        result_df = result_df.sort_values(by=['box_no', 'box_id'])
+        result_df = result_df.sort_values(by=['box_id', 'box_no'])
 
         # ✅ 出力対象のカラムだけに制限
         output_columns = [
