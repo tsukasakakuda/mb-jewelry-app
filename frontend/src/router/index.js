@@ -2,13 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MainMenu from '@/views/MainMenu.vue';
 import UploadForm from '@/views/UploadForm.vue';
 import LoginPage from '@/views/LoginPage.vue';
-import CsvEditor from '@/views/CsvEditor.vue';
+import CsvEditorPage from '@/views/CsvEditorPage.vue'
 
 const routes = [
   { path: '/', name: 'MainMenu', component: MainMenu },
   { path: '/calculate', name: 'UploadForm', component: UploadForm },
   { path: '/login', name: 'LoginPage', component: LoginPage },
-  { path: '/csv', name: 'CsvEditor', component: CsvEditor }
+  { path: '/csv', name: 'CsvEditor', component: CsvEditorPage }
 ];
 
 const router = createRouter({
