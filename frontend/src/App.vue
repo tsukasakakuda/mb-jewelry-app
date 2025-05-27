@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import UploadForm from './views/MetalCalculatePage.vue';
 import SidebarMenu from './components/SidebarMenu.vue';
 export default { components: { SidebarMenu } };
 </script>
