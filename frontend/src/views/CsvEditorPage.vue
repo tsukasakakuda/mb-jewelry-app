@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="min-h-screen bg-white p-6 w-full">
     <CsvEditor />
   </div>
 </template>
