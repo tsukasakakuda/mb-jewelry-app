@@ -15,13 +15,13 @@
             <router-link to="/" @click="closeMenu">メニュー</router-link>
           </li>
           <li class="p-4 hover:bg-gray-100">
-            <router-link to="/login" @click="closeMenu">ログイン</router-link>
-          </li>
-          <li class="p-4 hover:bg-gray-100">
             <router-link to="/calculate" @click="closeMenu">地金計算</router-link>
           </li>
           <li class="p-4 hover:bg-gray-100">
             <router-link to="/csv" @click="closeMenu">CSV加工</router-link>
+          </li>
+          <li class="p-4 hover:bg-gray-100">
+            <router-link to="/login" @click="closeMenu">ログイン</router-link>
           </li>
         </ul>
       </div>
@@ -33,13 +33,13 @@
             <router-link to="/" class="text-gray-700 hover:underline">メニュー</router-link>
           </li>
           <li>
-            <router-link to="/login" class="text-gray-700 hover:underline">ログイン</router-link>
-          </li>
-          <li>
             <router-link to="/calculate" class="text-gray-700 hover:underline">地金計算</router-link>
           </li>
           <li>
             <router-link to="/csv" class="text-gray-700 hover:underline">CSV加工</router-link>
+          </li>
+          <li>
+            <router-link to="/login" class="text-gray-700 hover:underline">ログイン</router-link>
           </li>
         </ul>
       </div>
