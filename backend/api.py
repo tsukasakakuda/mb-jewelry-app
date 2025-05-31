@@ -20,6 +20,9 @@ def edit_csv():
 
         df = pd.read_csv(file)
 
+        # カラム結合（NaN対応）: "misc + weight" → "詳細情報"
+        df['feature'] = df[['misc', 'weight']].fillna('').agg(' '.join, axis=1).str.strip()
+
         # 残したいカラムと対応する日本語ラベル
         column_map = {
             'end_date': '大会日',
@@ -28,8 +31,7 @@ def edit_csv():
             'subcategory_name': '品目',
             'brand_name': 'ブランド',
             'material': '素材',
-            'misc': '備考',
-            'weight': '重量',
+            'feature': '備考',
             'accessory_comment': '付属品'
         }
 
