@@ -1,25 +1,26 @@
-# Dockerfile
+# フロントエンドビルド用ステージ
 FROM node:18 AS build-stage
 WORKDIR /app
 COPY frontend ./frontend
 WORKDIR /app/frontend
 RUN npm install && npm run build
 
+# Pythonバックエンドステージ
 FROM python:3.9-slim
 WORKDIR /app
 
-#COPY backend/requirements.txt ./
-COPY requirements.txt .
-
+# ✅ requirements を正しいパスからコピー
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-#COPY . .
-COPY backend/ .       
+# ✅ api.py や他のバックエンドファイルをコピー
+COPY backend/ .
 
+# ✅ ビルド済みのフロントを dist にコピー
 COPY --from=build-stage /app/frontend/dist ./frontend/dist
 
-#これは追加
+# ✅ ポート明示（Cloud Run用）
 ENV PORT=8080
 
-#CMD ["python", "backend/api.py"]
+# ✅ エントリーポイントをapi.pyに
 CMD ["python", "api.py"]
