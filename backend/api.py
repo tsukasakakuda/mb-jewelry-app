@@ -11,6 +11,55 @@ import json
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
 
+@app.route('/edit-csv', methods=['POST'])
+def edit_csv():
+    try:
+        file = request.files.get('file')
+        if not file:
+            return jsonify({'error': 'CSVファイルが必要です'}), 400
+
+        df = pd.read_csv(file)
+
+        # カラム結合（NaN対応）: "misc + weight" → "詳細情報"
+        df['feature'] = df[['misc', 'weight']].fillna('').agg(' '.join, axis=1).str.strip()
+
+        # 残したいカラムと対応する日本語ラベル
+        column_map = {
+            'end_date': '大会日',
+            'box_id': '箱番',
+            'box_no': '枝番',
+            'subcategory_name': '品目',
+            'brand_name': 'ブランド',
+            'material': '素材',
+            'feature': '備考',
+            'accessory_comment': '付属品'
+        }
+
+        # 必要なカラムだけを抽出
+        needed_columns = [col for col in column_map.keys() if col in df.columns]
+        df = df[needed_columns]
+
+        # カラム名を日本語に変換
+        df = df.rename(columns=column_map)
+
+        # CSVをバイトストリームにして返す
+        output = io.StringIO()
+        df.to_csv(output, index=False)
+        output.seek(0)
+
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        filename = f"edited_result_{timestamp}.csv"
+
+        return send_file(
+            io.BytesIO(output.getvalue().encode('utf-8-sig')),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # --- エイリアスマップ読み込み ---
 def load_material_aliases(json_path="material_price_map.json"):
     with open(json_path, encoding='utf-8') as f:
@@ -101,10 +150,6 @@ def calculate_items(item_df, price_df):
     item_df[['jewelry_price', 'material_price', 'total_weight', 'gemstone_weight', 'material_weight']] = item_df.apply(calculate, axis=1)
     return item_df
 
-@app.route('/')
-def serve_vue():
-    return send_from_directory(app.static_folder, 'index.html')
-
 @app.route('/check-weights', methods=['POST'])
 def check_weights():
     try:
@@ -191,6 +236,10 @@ def calculate_fixed():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/')
+def serve_vue():
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))

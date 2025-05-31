@@ -81,9 +81,7 @@ export default {
       invalidWeights: [],
       allItems: [],
       validItems: [],
-      baseURL: import.meta.env.VITE_API_BASE
-      //baseURL: "http://localhost:8080"
-      //baseURL: "https://mb-auto-calculate-712647253695.asia-northeast1.run.app"
+      baseURL: import.meta.env.VITE_API_BASE,
     };
   },
   methods: {
@@ -135,7 +133,6 @@ export default {
         const errorIndexes = new Set(this.invalidWeights.map(w => w.index));
         this.validItems = this.allItems.filter((_, idx) => !errorIndexes.has(idx));
 
-        // ✅ エラーがなかった場合も計算を実行
         if (this.invalidWeights.length === 0) {
           this.submitFixedData();
         }
@@ -168,7 +165,7 @@ export default {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", filename);  // ← 動的ファイル名に変更
+        link.setAttribute("download", filename);
         document.body.appendChild(link);
         link.click();
         link.remove();
