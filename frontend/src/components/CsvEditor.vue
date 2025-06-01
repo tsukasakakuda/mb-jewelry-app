@@ -59,11 +59,16 @@ export default {
           throw new Error("エラーが発生しました");
         }
 
+        const disposition = res.headers.get("Content-Disposition");
+        const match = disposition && disposition.match(/filename="?(.+)"?/);
+        const filename = match ? match[1] : "edited_result.csv";
+
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "edited_csv.csv";
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
         link.click();
         window.URL.revokeObjectURL(url);
       } catch (err) {
