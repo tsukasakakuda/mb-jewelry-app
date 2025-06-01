@@ -50,13 +50,13 @@ def edit_csv():
         output.seek(0)
 
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"edited_result_{timestamp}.csv"
+        filename_edt = f"edited_result_{timestamp}.csv"
 
         return send_file(
             io.BytesIO(output.getvalue().encode('utf-8-sig')),
             mimetype='text/csv',
             as_attachment=True,
-            download_name=filename
+            download_name=filename_edt
         )
 
     except Exception as e:
@@ -227,13 +227,13 @@ def calculate_fixed():
         output.seek(0)
 
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"calculated_result_{timestamp}.csv"
+        filename_cal = f"calculated_result_{timestamp}.csv"
 
         return send_file(
             io.BytesIO(output.getvalue().encode('utf-8-sig')),
             mimetype='text/csv',
             as_attachment=True,
-            download_name=filename
+            download_name=filename_cal
         )
 
     except Exception as e:
