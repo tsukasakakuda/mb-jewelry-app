@@ -21,7 +21,9 @@ def edit_csv():
         df = pd.read_csv(file)
 
         # カラム結合（NaN対応）: "misc + weight" → "詳細情報"
-        df['feature'] = df[['misc', 'weight']].fillna('').agg(' '.join, axis=1).str.strip()
+        #['misc', 'weight', 'jewelry_carat', 'jewelry_color', 'jewelry_clarity', 'jewelry_cutting', 'jewelry_shape', 'jewelry_polish', 'jewelry_symmetry', 'jewelry_3ex', 'jewelry_h_c', 'jewelry_fluorescence']
+        df['feature'] = df[['misc', 'weight', 'jewelry_carat', 'jewelry_color', 'jewelry_clarity', 'jewelry_cutting', 'jewelry_shape', 'jewelry_polish', 'jewelry_symmetry', 'jewelry_fluorescence']].fillna('').astype(str).agg(' '.join, axis=1).str.strip()
+
 
         # 残したいカラムと対応する日本語ラベル
         column_map = {
