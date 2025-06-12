@@ -1,15 +1,66 @@
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
+from werkzeug.utils import secure_filename
 import numpy as np
 import pandas as pd
 import re
 import io
 import os
 import json
+import pymysql
+
+from dotenv import load_dotenv
+load_dotenv(dotenv_path='.env.development')  # 必要ならパス調整
 
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
+
+print("DB_USER:", os.getenv("DB_USER"))  # ← Noneなら読み込み失敗
+print("DB_PASSWORD:", os.getenv("DB_PASSWORD"))
+
+def get_connection():
+    return pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        db=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT", "3306")),  # ← ここ修正
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+@app.route("/items", methods=["POST"])
+def add_item():
+    data = request.get_json()
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+                INSERT INTO items (box_no, weight, jewelry_price)
+                VALUES (%s, %s, %s)
+            """
+            cursor.execute(sql, (
+                data.get("box_no"),
+                data.get("weight"),
+                data.get("jewelry_price")
+            ))
+            connection.commit()
+        return jsonify({"message": "登録成功"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
+@app.route("/upload-items", methods=["POST"])
+def upload_items():
+    try:
+        item_file = request.files['item_csv']
+        price_file = request.files['price_csv']
+        # ここで既存の CSV チェック・DB登録ロジックに渡す
+        # ex: calculate_and_insert(item_file, price_file)
+        return jsonify({"message": "登録成功"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/edit-csv', methods=['POST'])
 def edit_csv():
@@ -244,6 +295,6 @@ def serve_vue():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", "8080"))  # ← ここが重要
     print(f"✅ Starting Flask on port {port}")
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=True, host="0.0.0.0", port=port)

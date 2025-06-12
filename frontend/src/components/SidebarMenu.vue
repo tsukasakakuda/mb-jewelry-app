@@ -21,6 +21,9 @@
             <router-link to="/csv" @click="closeMenu">CSV加工</router-link>
           </li>
           <li class="p-4 hover:bg-gray-100">
+            <router-link to="/upload-items" @click="closeMenu">dbtest</router-link>
+          </li>
+          <li class="p-4 hover:bg-gray-100">
             <router-link to="/login" @click="closeMenu">ログイン</router-link>
           </li>
         </ul>
@@ -37,6 +40,9 @@
           </li>
           <li>
             <router-link to="/csv" class="text-gray-700 hover:underline">CSV加工</router-link>
+          </li>
+          <li>
+            <router-link to="/upload-items" class="text-gray-700 hover:underline">debtest</router-link>
           </li>
           <li>
             <router-link to="/login" class="text-gray-700 hover:underline">ログイン</router-link>
